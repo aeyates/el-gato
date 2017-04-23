@@ -8,25 +8,24 @@
 #include <WaveHC.h>
 #include <WaveUtil.h>
 
+// TODO: Holding these globally is expensive. Not sure how else to do it
 SdReader card;    // This object holds the information for the card
 FatVolume vol;    // This holds the information for the partition on the card
 FatReader root;   // This holds the information for the volumes root directory
-FatReader file;   // This object representing the WAV file being played
+FatReader file;
 WaveHC wave;      // This is the only wave (audio) object, since we will only play one at a time
 int sonarPin = 0; //pin connected to analog out on maxsonar sensor
 
-enum state {PURRING, MEOWING, GROWLING, HISSING};
+enum state {PURRING, MEOWING, GREETING, HISSING};
 state currentState;
-char filename[13];
+boolean lightOn=false;
 int i = 0;
+int purringCounter = 0;
 
 /*
  * Define macro to put error messages in flash memory
  */
 #define error(msg) error_P(PSTR(msg))
-
-// Function definitions (we define them here, but the code is below)
-void play(FatReader &dir);
 
 //////////////////////////////////// SETUP
 void setup() {
@@ -47,9 +46,6 @@ void setup() {
   
   // This card has a FAT partition on 1
   vol.init(card, 1); 
-  // Tell the user what we found
-  putstring(", type is FAT");
-  Serial.println(vol.fatType(), DEC);     // FAT16 or FAT32?
   
   // Try to open the root directory
   if (!root.openRoot(vol)) {
@@ -61,15 +57,15 @@ void setup() {
 
   // Print out all of the files in all the directories.
   //root.ls(LS_R | LS_FLAG_FRAGMENTED);
+  pinMode(8, OUTPUT);
 
   // Start by purring with lights on and dim
   state currentState = PURRING;
 
   putstring("Purr...Kitty is waiting for something to happen.");
   Serial.println();
-  strcpy_P(filename, PSTR("purr1.WAV"));
-  playfile(filename);
-  softGlow();
+  forcePlay(PSTR("purr1.WAV"));
+  toggleLight();
   delay(3000); // Let this go for a few seconds before looping
 
 }
@@ -78,8 +74,11 @@ void setup() {
 void loop() {
   i++;
   // Don't loop more than 4 times without stopping for input
-  if (i%4 == 0) {
+  if (i%8 == 0) {
     while (Serial.read() >= 0) {}
+    if (lightOn) {
+      toggleLight();
+    }
     putstring_nl("\ntype any character to start");
     while (Serial.read() < 0) {}
   }
@@ -87,40 +86,51 @@ void loop() {
   int distance = 1000;
   long hit = false;
 
-  // Check sensors
-  do {
-    // Is the sound still playing? If not replay.
-    playIfComplete(filename);
-    // Is anything in front of me? How far?
-    distance = checkApproach();
-    // Have I been hit? If so, fuck you buddy.
-    hit = checkForHit();
-    // Is there a hand in my mouth? Hey, mister, watch yourself.
-    // Delay 2 seconds before checking again
-    delay(2000);
-  } while (distance > 60 and !hit);
-
+  // Is the sound still playing? If not replay.
+  playAgainIfComplete();
+  // Is anything in front of me? How far?
+  distance = checkApproach();
+  // Have I been hit? If so, fuck you buddy.
+  hit = checkForHit();
+  // TODO: Is there a hand in my mouth? Hey, mister, watch yourself.
+  // TODO: Hiss should stop if no longer being hit.
+  // TODO: Voice should not repeat itself
   if (hit and currentState != HISSING) {
+    purringCounter = 0;
     currentState = HISSING;
     putstring("Hiss...Who the fuck do you think you are, buddy?\n");
-    strcpy_P(filename, PSTR("hiss1.WAV"));
-    playfile(filename);
-    flash(200);
+    forcePlay(PSTR("screech2.WAV"));
+    flash(100, 3);
+  } 
+  else if (distance > 36 and currentState != PURRING) {
+    // Don't go back to purring right away - increment the counter
+    purringCounter++;
+    if (purringCounter >= 5) {
+      currentState = PURRING;
+      putstring("Purr...I haven't seen anyone in awhile. Back to waiting.\n");
+      purringCounter = 0;
+      forcePlay(PSTR("purr1.WAV"));
+    }
   }
-  else if (distance > 10 and currentState != MEOWING) {
+  else if (distance > 10 and distance <= 36 and currentState != MEOWING) {
+    purringCounter = 0;
     currentState = MEOWING;
     putstring("Meow...I sensed an approach but you're not too close to me. I'll meow to bring you in.\n");
-    strcpy_P(filename, PSTR("meow2.WAV"));
-    playfile(filename);
-    flash(2000);
+    forcePlay(PSTR("meow.WAV"));
   } 
-  else if (distance <= 10 and currentState != GROWLING) {
-    currentState = GROWLING;
-    putstring("Growl...You're awfully close, buddy.\n");
-    strcpy_P(filename, PSTR("growl.WAV"));
-    playfile(filename);
-    flash(1000);
+  else if (distance <= 10 and currentState != GREETING) {
+    purringCounter = 0;
+    currentState = GREETING;
+    putstring("Greetings...Allow me to introduce myself.\n");
+    forcePlay(PSTR("hello.WAV"));
+    if (!lightOn) {
+      toggleLight();
+    }
   }
+
+  // Delay 2 seconds before checking again
+  delay(2000);
+
   
 }
 
@@ -159,7 +169,7 @@ int checkApproach() {
 
 // TODO: This will check the accelerometer
 boolean checkForHit() {
-   long hit = random(8);
+   long hit = random(5);
    if (hit == 0) {
     Serial.println("You just hit me!");
     return true;  

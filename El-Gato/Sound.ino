@@ -1,8 +1,21 @@
+char filename[13];
+
+/**
+ * Force the file to play, stopping whatever is playing. 
+ * Pass the name of the file. It will be copied into flash for you.
+ */
+void forcePlay(char* name) {
+  strcpy_P(filename, name);
+  playfile(filename);
+}
+
 /*
- * Play a file and wait for it to complete
+ * Force a file to play and wait for it to complete.
+ * Pass the name of the file. It will be copied into flash for you.
  */
 void playcomplete(char *name) {
-  playfile(name);
+  strcpy_P(filename, name);
+  playfile(filename);
   while (wave.isplaying);
   
   // see if an error occurred while playing
@@ -10,17 +23,19 @@ void playcomplete(char *name) {
 }
 
 /*
- * Play a file only if the previous is complete
+ * Play a file again only if the previous is complete.
+ * Pass the name of the file. It will be copied into flash for you.
  */
-void playIfComplete(char *name) {
+void playAgainIfComplete() {
   if (!wave.isplaying) {
     Serial.println("Song complete. Play again.");
-    playfile(name);    
+    wave.play();
   }  
 }
 
 /*
- * Play a file, stopping what is already playing
+ * Play a file, stopping what is already playing. This method is used
+ * internally and expects the name to be in flash.
  */
 void playfile(char *name) {
   if (wave.isplaying) {// already playing something, so stop it!
