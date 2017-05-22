@@ -3,10 +3,15 @@
 ## Sensors/Pins
 
 A0 - Sonar sensor for measuring distance
+
 A1 - Left Eye. 255=OFF, 0=DIM
+
 A2 - Left Eye. 255=OFF, 0=BRIGHT
+
 Digital 8 - Right Eye. HIGH=OFF, LOW=DIM
+
 Digital 9 - Right Eye. HIGH=OFF, LOW=BRIGHT
+
 SDReader - The reader for the SD card containing WAV files
 
 ## Global State
