@@ -16,10 +16,15 @@ void forcePlay(char* name) {
 void playcomplete(char *name) {
   strcpy_P(filename, name);
   playfile(filename);
-  while (wave.isplaying);
+  while (wave.isplaying) {
+    switchLight(DIM);
+    delay(200);
+    switchLight(BRIGHT);
+    delay(200);
+  }
   
   // see if an error occurred while playing
-  sdErrorCheck();
+  // sdErrorCheck(); crossing fingers instead
 }
 
 /*
@@ -29,6 +34,7 @@ void playcomplete(char *name) {
 void playAgainIfComplete() {
   if (!wave.isplaying) {
     Serial.println("Song complete. Play again.");
+    wave.seek(0);
     wave.play();
   }  
 }

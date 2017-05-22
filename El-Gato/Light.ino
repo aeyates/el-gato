@@ -1,20 +1,24 @@
-void toggleLight() {
-  if (lightOn) {
-    lightOn = false;
-    digitalWrite(8, LOW);    // turn the LED off by making the voltage LOW  
-  }
-  else {
-    lightOn = true;
-    digitalWrite(8, HIGH); // turn the LED on (HIGH is the voltage level)
-  }
-}
 
-void flash(long time, int repeat) {
-  for (int n=0; n<repeat; n++) {
-    toggleLight();
-    delay(time);
-    toggleLight();
-    delay(time);
-  }
+// Switch the lights to the desired mode
+void switchLight(lightMode mode) {
+  if (mode == OFF) {
+    analogWrite(A1, 255);
+    analogWrite(A2, 255);
+    digitalWrite(8, HIGH);    
+    digitalWrite(9, HIGH);    
+    currentLightMode = OFF;           
+  } else if (mode == DIM) {
+    analogWrite(A2, 255);
+    analogWrite(A1, 0);     
+    digitalWrite(8, LOW);    
+    digitalWrite(9, HIGH);    
+    currentLightMode = DIM;   
+  } else {
+    // Bright
+    analogWrite(A1, 255);
+    analogWrite(A2, 0);    
+    digitalWrite(8, HIGH);    
+    digitalWrite(9, LOW);    
+    currentLightMode = BRIGHT;       
+  }  
 }
-
