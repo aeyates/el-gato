@@ -17,12 +17,22 @@ void playcomplete(char *name) {
   strcpy_P(filename, name);
   playfile(filename);
   while (wave.isplaying) {
+  }
+}
+
+/*
+ * Force a file to play and wait for it to complete.
+ * Pass the name of the file. It will be copied into flash for you.
+ */
+void playcompleteflash(char *name) {
+  strcpy_P(filename, name);
+  playfile(filename);
+  while (wave.isplaying) {
     switchLight(DIM);
     delay(200);
     switchLight(BRIGHT);
     delay(200);
   }
-  
   // see if an error occurred while playing
   // sdErrorCheck(); crossing fingers instead
 }
