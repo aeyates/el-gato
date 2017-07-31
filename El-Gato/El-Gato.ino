@@ -50,7 +50,6 @@ void setup() {
   // Start by purring
   state currentState = PURRING;
 
-  Serial.println(F("Purr...Kitty is waiting for something to happen."));
   forcePlay(PSTR("purr1.WAV"));
   // Start with lights off
   pinMode(8, OUTPUT); 
@@ -81,7 +80,7 @@ void loop() {
   }
   // Is anything in front of me? How far?
   distance = checkApproach();
-  if (distance > 72 and currentState != PURRING) {
+  if (distance > 230 and currentState != PURRING) {
     // Don't go back to purring right away - increment the counter
     purringCounter++;
     if (purringCounter >= 5) {
@@ -89,31 +88,28 @@ void loop() {
       growlingCounter = 0;
       currentState = PURRING;
       switchLight(OFF);
-      Serial.println(F("Purr...I haven't seen anyone in awhile. Back to waiting."));
       purringCounter = 0;
       forcePlay(PSTR("purr1.WAV"));
     }
   }
-  else if (distance > 48 and distance <= 72 and currentState != MEOWING and currentState != GREETING) {
+  else if (distance > 72 and distance <= 230 and currentState != MEOWING and currentState != GREETING) {
     purringCounter = 0;
     greetingCounter = 0;
     growlingCounter = 0;
     currentState = MEOWING;
-    Serial.println(F("Meow...I sensed an approach but you're not too close to me. I'll meow to bring you in."));
     // Brighten the eyes; begin meowing. Dim eyes after a couple of seconds and leave them that way until state changes
     switchLight(BRIGHT);
-    forcePlay(PSTR("meow.WAV"));
+    forcePlay(PSTR("meow3.WAV"));
     delay(2000);
     switchLight(DIM);
-  } else if (distance < 24) {
-    Serial.println("You're awfully close");
+  } else if (distance < 30) {
     Serial.println(growlingCounter);
     currentState = GROWLING;
     purringCounter = 0;
     greetingCounter = 0;
     switchLight(DIM);
     if (growlingCounter == 0) {
-       playcomplete(PSTR("bite.WAV"));            
+       randomMouth();
        switchLight(BRIGHT);
        playcomplete(PSTR("lion.WAV"));
        growlingCounter++;
@@ -126,7 +122,7 @@ void loop() {
           growlingCounter++;      
        }
     }
-  } else if (distance <= 48 and currentState != GREETING) {
+  } else if (distance <= 72 and currentState != GREETING) {
     purringCounter = 0;
     growlingCounter = 0;
     currentState = GREETING;
@@ -163,10 +159,10 @@ int checkApproach() {
 
 void randomGreeting(int distance) {
 
-  if (distance > 48) {
+  if (distance > 72) {
     playcomplete(PSTR("fraidy.WAV"));
   } else {
-    int number = random(9);
+    int number = random(6);
     switchLight(BRIGHT);
     Serial.println(F("Playing a random greeting."));
     
@@ -179,15 +175,25 @@ void randomGreeting(int distance) {
     } else if (number == 3) {
       playcomplete(PSTR("catnap.WAV"));            
     } else if (number == 4) {
-      playcomplete(PSTR("cool.WAV"));            
-    } else if (number == 5) {
-      playcomplete(PSTR("chronic.WAV"));            
-    } else if (number == 6) {
       playcomplete(PSTR("catsmew.WAV"));            
-    } else if (number == 7) {
+    } else if (number == 5) {
       playcomplete(PSTR("furry.WAV"));            
-    } else if (number == 8) {
-      playcomplete(PSTR("pie.WAV"));            
-    }
+    } 
   }
 }
+
+void randomMouth() {
+    int number = random(5);
+    if (number == 0) {
+      playcomplete(PSTR("bite.WAV"));
+    } else if (number == 1) {
+      playcomplete(PSTR("pie.WAV"));                             
+    } else if (number == 2) {
+      playcomplete(PSTR("chronic.WAV"));            
+    } else if (number == 3) {
+      playcomplete(PSTR("nine.WAV"));            
+    } else if (number == 4) {
+      playcomplete(PSTR("cool.WAV"));            
+    }
+}
+
