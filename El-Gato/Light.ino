@@ -22,3 +22,4 @@ void switchLight(lightMode mode) {
     currentLightMode = BRIGHT;       
   }  
 }
+
