@@ -183,7 +183,7 @@ void randomGreeting(int distance) {
 }
 
 void randomMouth() {
-    int number = random(5);
+    int number = random(7);
     if (number == 0) {
       playcomplete(PSTR("bite.WAV"));
     } else if (number == 1) {
@@ -194,6 +194,10 @@ void randomMouth() {
       playcomplete(PSTR("nine.WAV"));            
     } else if (number == 4) {
       playcomplete(PSTR("cool.WAV"));            
+    } else if (number == 5) {
+      playcomplete(PSTR("scrub.WAV"));            
+    } else {
+      playcomplete(PSTR("buddha.WAV"));            
     }
 }
 
