@@ -162,9 +162,8 @@ void randomGreeting(int distance) {
   if (distance > 72) {
     playcomplete(PSTR("fraidy.WAV"));
   } else {
-    int number = random(6);
+    int number = random(7);
     switchLight(BRIGHT);
-    Serial.println(F("Playing a random greeting."));
     
     if (number == 0) {
       playcomplete(PSTR("skin.WAV"));    
@@ -178,6 +177,8 @@ void randomGreeting(int distance) {
       playcomplete(PSTR("catsmew.WAV"));            
     } else if (number == 5) {
       playcomplete(PSTR("furry.WAV"));            
+    } else {
+      playcomplete(PSTR("litter.WAV"));            
     } 
   }
 }
